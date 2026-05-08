@@ -1,4 +1,4 @@
-package ru.practicum.dal;
+package ru.practicum.dao;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -12,9 +12,9 @@ import ru.practicum.util.HibernateSessionFactoryUtil;
 import java.util.List;
 import java.util.Optional;
 
-public class UserRepositoryImpl implements UserRepository {
+public class UserDaoImpl implements UserDao {
 
-    private static final Logger log = LoggerFactory.getLogger(UserRepositoryImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(UserDaoImpl.class);
 
     @Override
     public User saveUser(User user) {

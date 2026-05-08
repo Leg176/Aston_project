@@ -2,7 +2,7 @@ package ru.practicum.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.practicum.dal.UserRepository;
+import ru.practicum.dao.UserDao;
 import ru.practicum.dto.UserRequestDto;
 import ru.practicum.dto.UserResponseDto;
 import ru.practicum.dto.UserUpdateDto;
@@ -18,24 +18,24 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
-    private final UserRepository userRepository;
+    private final UserDao userDao;
 
-    public UserServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public UserServiceImpl(UserDao userDao) {
+        this.userDao = userDao;
     }
 
     @Override
     public UserResponseDto save(UserRequestDto requestDto) {
         log.info("Сохранение User с email: {}", requestDto.getEmail());
 
-        if (userRepository.existsByEmail(requestDto.getEmail())) {
+        if (userDao.existsByEmail(requestDto.getEmail())) {
             log.warn("User с email {} в базе существует", requestDto.getEmail());
             throw new IllegalArgumentException("Данный email в базе уже присутствует!");
         }
 
         User user = UserMapper.mapToUser(requestDto);
         user.setCreatedAt(LocalDateTime.now());
-        User savedUser = userRepository.saveUser(user);
+        User savedUser = userDao.saveUser(user);
         log.info("User сохранён с id: {}", savedUser.getId());
 
         return UserMapper.mapToUserResponseDto(savedUser);
@@ -49,13 +49,13 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Id не может быть null");
         }
 
-        if (updateDto.hasEmail() && userRepository.existsByEmail(updateDto.getEmail())) {
+        if (updateDto.hasEmail() && userDao.existsByEmail(updateDto.getEmail())) {
             log.warn("User с email {} в базе существует", updateDto.getEmail());
             throw new IllegalArgumentException("Данный email в базе уже присутствует!");
         }
 
         Long idUserUpdate = updateDto.getId();
-        Optional<User> userOpt = userRepository.getUserById(idUserUpdate);
+        Optional<User> userOpt = userDao.getUserById(idUserUpdate);
 
         if (userOpt.isEmpty()) {
             log.warn("Пользователь с id {} не найден", idUserUpdate);
@@ -65,7 +65,7 @@ public class UserServiceImpl implements UserService {
         User user = userOpt.get();
 
         UserMapper.updateUserFields(user, updateDto);
-        User updateUser = userRepository.updateUser(user);
+        User updateUser = userDao.updateUser(user);
         log.info("User с id обновлён: {}", updateUser.getId());
 
         return UserMapper.mapToUserResponseDto(updateUser);
@@ -90,7 +90,7 @@ public class UserServiceImpl implements UserService {
             return List.of();
         }
 
-        List<User> users = userRepository.getUsers(idsFilter);
+        List<User> users = userDao.getUsers(idsFilter);
         log.info("Найдено Users: {}", users.size());
         return UserMapper.mapToListDto(users);
     }
@@ -98,7 +98,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserResponseDto> findAll() {
         log.info("Поиск всех User в базе");
-        List<User> users = userRepository.findAll();
+        List<User> users = userDao.findAll();
         log.info("Общее количество Users в базе данных: {}", users.size());
 
         return UserMapper.mapToListDto(users);
@@ -113,7 +113,7 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Id не может быть null");
         }
 
-        boolean isDeleted = userRepository.deleteUser(id);
+        boolean isDeleted = userDao.deleteUser(id);
 
         if (isDeleted) {
             log.info("User с id {} удалён", id);

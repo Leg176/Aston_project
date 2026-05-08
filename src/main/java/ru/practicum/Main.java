@@ -1,7 +1,7 @@
 package ru.practicum;
 
-import ru.practicum.dal.UserRepository;
-import ru.practicum.dal.UserRepositoryImpl;
+import ru.practicum.dao.UserDao;
+import ru.practicum.dao.UserDaoImpl;
 import ru.practicum.dto.UserRequestDto;
 import ru.practicum.dto.UserResponseDto;
 import ru.practicum.dto.UserUpdateDto;
@@ -16,8 +16,8 @@ public class Main {
     private static final Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
-        UserRepository userRepository = new UserRepositoryImpl();
-        UserService userService = new UserServiceImpl(userRepository);
+        UserDao userDao = new UserDaoImpl();
+        UserService userService = new UserServiceImpl(userDao);
 
         boolean isWork = true;
 

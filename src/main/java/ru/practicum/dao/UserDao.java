@@ -1,10 +1,10 @@
-package ru.practicum.dal;
+package ru.practicum.dao;
 
 import ru.practicum.entity.User;
 import java.util.List;
 import java.util.Optional;
 
-public interface UserRepository {
+public interface UserDao {
     User saveUser(User user);
 
     User updateUser(User user);
