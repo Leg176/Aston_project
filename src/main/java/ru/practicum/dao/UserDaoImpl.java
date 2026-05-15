@@ -2,12 +2,12 @@ package ru.practicum.dao;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.practicum.entity.User;
-import ru.practicum.util.HibernateSessionFactoryUtil;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,10 +15,15 @@ import java.util.Optional;
 public class UserDaoImpl implements UserDao {
 
     private static final Logger log = LoggerFactory.getLogger(UserDaoImpl.class);
+    private final SessionFactory sessionFactory;
+
+    public UserDaoImpl(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
 
     @Override
     public User saveUser(User user) {
-        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             Transaction tx = session.beginTransaction();
             session.save(user);
             tx.commit();
@@ -31,7 +36,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public User updateUser(User user) {
-        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             Transaction tx = session.beginTransaction();
             User mergeUser = (User) session.merge(user);
             tx.commit();
@@ -44,7 +49,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public Optional<User> getUserById(Long id) {
-        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             User user = session.get(User.class, id);
             return Optional.ofNullable(user);
         }
@@ -52,7 +57,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public List<User> getUsers(List<Long> ids) {
-        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             Query<User> query = session.createQuery("FROM User u WHERE u.id IN :ids", User.class);
             query.setParameter("ids", ids);
             return query.getResultList();
@@ -61,14 +66,14 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public List<User> findAll() {
-        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             return session.createQuery("FROM User", User.class).getResultList();
         }
     }
 
     @Override
     public boolean deleteUser(Long id) {
-        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             Transaction tx = session.beginTransaction();
             User user = session.get(User.class, id);
 
@@ -87,7 +92,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public boolean existsByEmail(String email) {
-        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             Query<Long> query = session.createQuery("SELECT COUNT(u) FROM User u WHERE u.email = :email", Long.class);
             query.setParameter("email", email);
             return query.getSingleResult() > 0;
@@ -96,7 +101,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public boolean existsById(Long id) {
-        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             Query<Long> query = session.createQuery("SELECT COUNT(u) FROM User u WHERE u.id = :id", Long.class);
             query.setParameter("id", id);
             return query.getSingleResult() > 0;

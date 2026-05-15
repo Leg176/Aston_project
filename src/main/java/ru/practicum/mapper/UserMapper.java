@@ -14,7 +14,6 @@ public final class UserMapper {
     }
 
     public static User mapToUser(UserRequestDto request) {
-
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());

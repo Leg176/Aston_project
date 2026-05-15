@@ -50,7 +50,6 @@ public class UserServiceImplTest {
 
     @BeforeEach
     void setUp() {
-
         LocalDateTime date = LocalDateTime.of(2026, 5, 15, 12, 0, 0);
         LocalDateTime date1 = LocalDateTime.of(2026, 2, 11, 11, 0, 0);
 
@@ -69,7 +68,6 @@ public class UserServiceImplTest {
 
     @Test
     void save_userWithUniqueEmail_savesUser(){
-
         when(userDao.existsByEmail(requestDto.getEmail())).thenReturn(false);
 
         when(userDao.saveUser(any(User.class))).thenReturn(savedUser);
@@ -88,7 +86,6 @@ public class UserServiceImplTest {
 
     @Test
     void save_duplicateEmail_throwsException() {
-
         when(userDao.existsByEmail(requestDto.getEmail())).thenReturn(true);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.save(requestDto));
@@ -100,7 +97,6 @@ public class UserServiceImplTest {
 
     @Test
     void update_validUser_updateUser() {
-
         when(userDao.existsByEmail(updateDto.getEmail())).thenReturn(false);
         when(userDao.getUserById(updateDto.getId())).thenReturn(Optional.of(savedUser));
 
@@ -121,7 +117,6 @@ public class UserServiceImplTest {
 
     @Test
     void update_nullId_throwsException() {
-
         updateDto.setId(null);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.update(updateDto));
@@ -134,7 +129,6 @@ public class UserServiceImplTest {
 
     @Test
     void update_duplicateEmail_throwsException() {
-
         when(userDao.existsByEmail(updateDto.getEmail())).thenReturn(true);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.update(updateDto));
@@ -146,7 +140,6 @@ public class UserServiceImplTest {
 
     @Test
     void update_userNotFound_throwsException() {
-
         when(userDao.existsByEmail(updateDto.getEmail())).thenReturn(false);
         when(userDao.getUserById(updateDto.getId())).thenReturn(Optional.empty());
 
@@ -159,7 +152,6 @@ public class UserServiceImplTest {
 
     @Test
     void get_validIds_returnsUsers() {
-
         List<Long> ids = List.of(1L, 2L);
         List<User> users = List.of(savedUser, savedUser1);
 
@@ -178,7 +170,6 @@ public class UserServiceImplTest {
     @ParameterizedTest
     @NullAndEmptySource
     void get_nullOrEmptyListId_returnsEmptyList(List<Long> ids) {
-
         List<UserResponseDto> userDtos = service.getUsers(ids);
 
         assertNotNull(userDtos);
@@ -189,7 +180,6 @@ public class UserServiceImplTest {
 
     @Test
     void get_listIdContainsOnlyNulls_returnsEmptyList() {
-
         List<Long> ids = new ArrayList<>();
         ids.add(null);
         ids.add(null);
@@ -204,7 +194,6 @@ public class UserServiceImplTest {
 
     @Test
     void findAll_returnsAllUsers() {
-
         List<User> users =List.of(savedUser, savedUser1);
 
         when(userDao.findAll()).thenReturn(users);
@@ -221,7 +210,6 @@ public class UserServiceImplTest {
 
     @Test
     void delete_validId_deleteUser() {
-
         Long id = 1L;
 
         when(userDao.deleteUser(id)).thenReturn(true);
@@ -235,7 +223,6 @@ public class UserServiceImplTest {
 
     @Test
     void delete_userNotFound_returnFalse() {
-
         Long id = 999L;
 
         when(userDao.deleteUser(id)).thenReturn(false);
@@ -249,7 +236,6 @@ public class UserServiceImplTest {
 
     @Test
     void delete_nullId_throwException() {
-
         Long id = null;
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.deleteUser(id));

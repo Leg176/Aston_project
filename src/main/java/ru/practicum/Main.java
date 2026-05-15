@@ -1,5 +1,6 @@
 package ru.practicum;
 
+import org.hibernate.SessionFactory;
 import ru.practicum.dao.UserDao;
 import ru.practicum.dao.UserDaoImpl;
 import ru.practicum.dto.UserRequestDto;
@@ -7,6 +8,7 @@ import ru.practicum.dto.UserResponseDto;
 import ru.practicum.dto.UserUpdateDto;
 import ru.practicum.service.UserService;
 import ru.practicum.service.UserServiceImpl;
+import ru.practicum.util.HibernateSessionFactoryUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +18,8 @@ public class Main {
     private static final Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
-        UserDao userDao = new UserDaoImpl();
+        SessionFactory sessionFactory = HibernateSessionFactoryUtil.getSessionFactory();
+        UserDao userDao = new UserDaoImpl(sessionFactory);
         UserService userService = new UserServiceImpl(userDao);
 
         boolean isWork = true;
