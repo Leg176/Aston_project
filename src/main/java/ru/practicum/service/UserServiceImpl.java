@@ -120,6 +120,7 @@ public class UserServiceImpl implements UserService {
         } else {
             log.warn("User с id {} не найден", id);
         }
+
         return isDeleted;
     }
 }
