@@ -1,5 +1,6 @@
 package ru.practicum.mapper;
 
+import org.springframework.stereotype.Component;
 import ru.practicum.dto.UserRequestDto;
 import ru.practicum.dto.UserResponseDto;
 import ru.practicum.dto.UserUpdateDto;
@@ -7,13 +8,14 @@ import ru.practicum.entity.User;
 
 import java.util.List;
 
-public final class UserMapper {
+@Component
+public class UserMapper {
 
-    public static UserResponseDto mapToUserResponseDto(User user) {
+    public UserResponseDto mapToUserResponseDto(User user) {
         return new UserResponseDto(user.getId(), user.getName(), user.getEmail(), user.getAge(), user.getCreatedAt());
     }
 
-    public static User mapToUser(UserRequestDto request) {
+    public User mapToUser(UserRequestDto request) {
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
@@ -25,7 +27,7 @@ public final class UserMapper {
         return user;
     }
 
-    public static User updateUserFields(User user, UserUpdateDto updateDto) {
+    public User updateUserFields(User user, UserUpdateDto updateDto) {
 
         if (updateDto.hasName()) {
             user.setName(updateDto.getName());
@@ -42,9 +44,9 @@ public final class UserMapper {
         return user;
     }
 
-    public static List<UserResponseDto> mapToListDto(List<User> users) {
+    public List<UserResponseDto> mapToListDto(List<User> users) {
         return users.stream()
-                .map(UserMapper::mapToUserResponseDto)
+                .map(this::mapToUserResponseDto)
                 .toList();
     }
 }

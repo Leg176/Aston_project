@@ -5,6 +5,7 @@ import ru.practicum.dto.UserResponseDto;
 import ru.practicum.dto.UserUpdateDto;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserService {
     UserResponseDto save(UserRequestDto requestDto);
@@ -15,5 +16,7 @@ public interface UserService {
 
     List<UserResponseDto> findAll();
 
-    boolean deleteUser(Long id);
+    void deleteUser(Long id);
+
+    UserResponseDto getUser(Long id);
 }
