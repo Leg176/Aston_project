@@ -1,12 +1,16 @@
 package ru.practicum.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.LocalDateTime;
 
 public class UserResponseDto {
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
     private String name;
     private String email;
     private Integer age;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime createdAt;
 
     public UserResponseDto() {
@@ -34,10 +38,6 @@ public class UserResponseDto {
 
     public Integer getAge() {
         return age;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
     }
 
     @Override
