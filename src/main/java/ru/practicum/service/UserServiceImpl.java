@@ -1,9 +1,11 @@
 package ru.practicum.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import ru.practicum.entity.TypeOperation;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.repository.UserRepository;
 import ru.practicum.dto.UserRequestDto;
@@ -11,6 +13,7 @@ import ru.practicum.dto.UserResponseDto;
 import ru.practicum.dto.UserUpdateDto;
 import ru.practicum.entity.User;
 import ru.practicum.mapper.UserMapper;
+import ru.practicum.service.producer.KafkaProducerService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,12 +24,14 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
+    private final KafkaProducerService kafkaProducer;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, KafkaProducerService kafkaProducer) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.kafkaProducer = kafkaProducer;
     }
 
     @Override
@@ -37,6 +42,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserResponseDto save(UserRequestDto requestDto) {
         log.info("Сохранение User с email: {}", requestDto.getEmail());
 
@@ -50,10 +56,13 @@ public class UserServiceImpl implements UserService {
         User savedUser = userRepository.save(user);
         log.info("User сохранён с id: {}", savedUser.getId());
 
+        kafkaProducer.sendUserOperation(savedUser.getEmail(), TypeOperation.CREATE.name());
+
         return userMapper.mapToUserResponseDto(savedUser);
     }
 
     @Override
+    @Transactional
     public UserResponseDto update(UserUpdateDto updateDto) {
         log.info("Обновление User с id: {}", updateDto.getId());
 
@@ -117,14 +126,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void deleteUser(Long id) {
         log.info("Удаление User с id: {}", id);
+        Optional<User> userOpt = userRepository.findById(id);
 
-        if (id == null) {
-            log.error("Попытка удаления User с id = null");
-            throw new IllegalArgumentException("Id не может быть null");
+        if (userOpt.isEmpty()) {
+            log.error("Попытка удаления User с не существующим id: {}", id);
+            throw new IllegalArgumentException("Id не верен");
         }
 
-        userRepository.deleteById(id);
+        User user = userOpt.get();
+
+        userRepository.delete(user);
+        kafkaProducer.sendUserOperation(user.getEmail(), TypeOperation.DELETE.name());
     }
 }
