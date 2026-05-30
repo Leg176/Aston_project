@@ -22,6 +22,6 @@ public class KafkaProducerServiceImpl implements KafkaProducerService {
     public void sendUserOperation(String email, String typeOperation) {
         String topic = kafkaConfig.getTopic();
         kafkaTemplate.send(topic, email, typeOperation);
-        log.info("A message was sent to Kafka: topic = {}, email = {}, operation = {}", topic, email, typeOperation);
+        log.info("Сообщение отправлено в Kafka: topic = {}, email = {}, operation = {}", topic, email, typeOperation);
     }
 }
