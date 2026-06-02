@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.practicum.entity.TypeOperation;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.mapper.UserMapper;
 import ru.practicum.repository.UserRepository;
@@ -16,6 +17,7 @@ import ru.practicum.dto.UserRequestDto;
 import ru.practicum.dto.UserResponseDto;
 import ru.practicum.dto.UserUpdateDto;
 import ru.practicum.entity.User;
+import ru.practicum.service.producer.KafkaProducerService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -29,6 +31,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -43,6 +47,9 @@ public class UserServiceImplTest {
 
     @Mock
     private UserMapper userMapper;
+
+    @Mock
+    private KafkaProducerService kafkaProducer;
 
     @InjectMocks
     private UserServiceImpl service;
@@ -83,6 +90,8 @@ public class UserServiceImplTest {
         when(userMapper.mapToUser(requestDto)).thenReturn(savedUser);
         when(userMapper.mapToUserResponseDto(savedUser)).thenReturn(responseDto);
 
+        doNothing().when(kafkaProducer).sendUserOperation(anyString(), anyString());
+
         UserResponseDto response = service.save(requestDto);
 
         assertNotNull(response);
@@ -93,6 +102,7 @@ public class UserServiceImplTest {
 
         verify(userRepository).existsByEmail(requestDto.getEmail());
         verify(userRepository, times(1)).save(any(User.class));
+        verify(kafkaProducer, times(1)).sendUserOperation(anyString(), eq(TypeOperation.CREATE.name()));
     }
 
     @Test
@@ -226,13 +236,17 @@ public class UserServiceImplTest {
 
     @Test
     void delete_validId_deleteUser() {
-        Long id = 1L;
+        Long id = 2L;
 
-        doNothing().when(userRepository).deleteById(id);
+        when(userRepository.findById(id)).thenReturn(Optional.of(savedUser));
+        doNothing().when(userRepository).delete(savedUser);
+        doNothing().when(kafkaProducer).sendUserOperation(anyString(), anyString());
 
         service.deleteUser(id);
 
-        verify(userRepository).deleteById(id);
+        verify(userRepository).findById(id);
+        verify(userRepository).delete(savedUser);
+        verify(kafkaProducer).sendUserOperation(savedUser.getEmail(), TypeOperation.DELETE.name());
     }
 
     @Test
@@ -241,7 +255,7 @@ public class UserServiceImplTest {
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.deleteUser(id));
 
-        assertEquals("Id не может быть null", exception.getMessage());
+        assertEquals("Id не верен", exception.getMessage());
 
         verify(userRepository, never()).deleteById(anyLong());
     }
