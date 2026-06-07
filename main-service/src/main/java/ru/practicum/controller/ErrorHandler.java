@@ -2,7 +2,6 @@ package ru.practicum.controller;
 
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -32,7 +31,8 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<String> handle(ConstraintViolationException ex) {
-        return ResponseEntity.badRequest().body(ex.getMessage());
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handle(ConstraintViolationException e) {
+        return new ErrorResponse(e.getMessage());
     }
 }

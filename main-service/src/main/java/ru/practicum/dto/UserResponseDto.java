@@ -1,15 +1,29 @@
 package ru.practicum.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import org.springframework.hateoas.RepresentationModel;
+import ru.practicum.constants.OpenApiConstants;
 
 import java.time.LocalDateTime;
 
-public class UserResponseDto {
+@Schema(description = OpenApiConstants.USER_RESPONSE_DESCRIPTION)
+public class UserResponseDto extends RepresentationModel<UserResponseDto> {
+    @Schema(description = OpenApiConstants.USER_ID_DESCRIPTION,
+            example = OpenApiConstants.USER_ID_EXAMPLE)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
+    @Schema(description = OpenApiConstants.USER_NAME_DESCRIPTION,
+            example = OpenApiConstants.USER_NAME_EXAMPLE)
     private String name;
+    @Schema(description = OpenApiConstants.USER_EMAIL_DESCRIPTION,
+            example = OpenApiConstants.USER_EMAIL_EXAMPLE)
     private String email;
+    @Schema(description = OpenApiConstants.USER_AGE_DESCRIPTION,
+            example = OpenApiConstants.USER_AGE_EXAMPLE)
     private Integer age;
+    @Schema(description = OpenApiConstants.USER_CREATE_DESCRIPTION,
+            example = OpenApiConstants.USER_CREATE_EXAMPLE)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime createdAt;
 

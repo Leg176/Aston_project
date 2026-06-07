@@ -37,6 +37,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -88,11 +89,10 @@ public class UserServiceImplTest {
         when(userRepository.existsByEmail(requestDto.getEmail())).thenReturn(false);
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
         when(userMapper.mapToUser(requestDto)).thenReturn(savedUser);
-        when(userMapper.mapToUserResponseDto(savedUser)).thenReturn(responseDto);
 
         doNothing().when(kafkaProducer).sendUserOperation(anyString(), anyString());
 
-        UserResponseDto response = service.save(requestDto);
+        User response = service.save(requestDto);
 
         assertNotNull(response);
         assertEquals(1L, response.getId());
@@ -121,18 +121,14 @@ public class UserServiceImplTest {
         when(userRepository.existsByEmail(updateDto.getEmail())).thenReturn(false);
         when(userRepository.findById(updateDto.getId())).thenReturn(Optional.of(savedUser));
         when(userRepository.save(any(User.class))).thenReturn(updateUser);
-        when(userMapper.mapToUserResponseDto(any(User.class))).thenAnswer(invocation -> {
-                    User u = invocation.getArgument(0);
-                    return new UserResponseDto(u.getId(), u.getName(), u.getEmail(), u.getAge(), u.getCreatedAt());
-                });
 
-        UserResponseDto responseDto = service.update(updateDto);
+        User response = service.update(updateDto);
 
-        assertNotNull(responseDto);
-        assertEquals(1L, responseDto.getId());
-        assertEquals("Alex", responseDto.getName());
-        assertEquals("alex@test.com", responseDto.getEmail());
-        assertEquals(41, responseDto.getAge());
+        assertNotNull(response);
+        assertEquals(1L, response.getId());
+        assertEquals("Alex", response.getName());
+        assertEquals("alex@test.com", response.getEmail());
+        assertEquals(41, response.getAge());
 
         verify(userRepository).existsByEmail(updateDto.getEmail());
         verify(userRepository).findById(updateDto.getId());
@@ -180,14 +176,13 @@ public class UserServiceImplTest {
         List<User> users = List.of(savedUser, savedUser1);
 
         when(userRepository.findAllById(ids)).thenReturn(users);
-        when(userMapper.mapToListDto(anyList())).thenReturn(List.of(responseDto, responseDto1));
 
-        List<UserResponseDto> responseDtos = service.getUsers(ids);
+        List<User> result = service.getUsers(ids);
 
-        assertNotNull(responseDtos);
-        assertEquals(2, responseDtos.size());
-        assertEquals("Igor", responseDtos.get(0).getName());
-        assertEquals("Alex", responseDtos.get(1).getName());
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("Igor", result.get(0).getName());
+        assertEquals("Alex", result.get(1).getName());
 
         verify(userRepository, times(1)).findAllById(ids);
     }
@@ -195,10 +190,10 @@ public class UserServiceImplTest {
     @ParameterizedTest
     @NullAndEmptySource
     void get_nullOrEmptyListId_returnsEmptyList(List<Long> ids) {
-        List<UserResponseDto> userDtos = service.getUsers(ids);
+        List<User> users = service.getUsers(ids);
 
-        assertNotNull(userDtos);
-        assertTrue(userDtos.isEmpty());
+        assertNotNull(users);
+        assertTrue(users.isEmpty());
 
         verify(userRepository, never()).findAllById(anyList());
     }
@@ -209,10 +204,10 @@ public class UserServiceImplTest {
         ids.add(null);
         ids.add(null);
 
-        List<UserResponseDto> userDtos = service.getUsers(ids);
+        List<User> users = service.getUsers(ids);
 
-        assertNotNull(userDtos);
-        assertTrue(userDtos.isEmpty());
+        assertNotNull(users);
+        assertTrue(users.isEmpty());
 
         verify(userRepository, never()).findAllById(anyList());
     }
@@ -222,14 +217,13 @@ public class UserServiceImplTest {
         List<User> users =List.of(savedUser, savedUser1);
 
         when(userRepository.findAll()).thenReturn(users);
-        when(userMapper.mapToListDto(anyList())).thenReturn(List.of(responseDto, responseDto1));
 
-        List<UserResponseDto> responseDtos = service.findAll();
+        List<User> result = service.findAll();
 
-        assertNotNull(responseDtos);
-        assertEquals(2, responseDtos.size());
-        assertTrue(responseDtos.stream().anyMatch(u -> u.getName().equals("Igor")));
-        assertTrue(responseDtos.stream().anyMatch(u -> u.getName().equals("Alex")));
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertTrue(result.stream().anyMatch(u -> u.getName().equals("Igor")));
+        assertTrue(result.stream().anyMatch(u -> u.getName().equals("Alex")));
 
         verify(userRepository).findAll();
     }
@@ -257,20 +251,20 @@ public class UserServiceImplTest {
 
         assertEquals("Id не верен", exception.getMessage());
 
-        verify(userRepository, never()).deleteById(anyLong());
+        verify(userRepository, never()).delete(any());
+        verifyNoInteractions(kafkaProducer);
     }
 
     @Test
     void getUser_existingId_returnsUser() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(savedUser));
-        when(userMapper.mapToUserResponseDto(savedUser)).thenReturn(responseDto);
-        UserResponseDto responseDto = service.getUser(1L);
+        User user = service.getUser(1L);
 
-        assertNotNull(responseDto);
-        assertEquals(1L, responseDto.getId());
-        assertEquals("Igor", responseDto.getName());
-        assertEquals("test@test.com", responseDto.getEmail());
-        assertEquals(23, responseDto.getAge());
+        assertNotNull(user);
+        assertEquals(1L, user.getId());
+        assertEquals("Igor", user.getName());
+        assertEquals("test@test.com", user.getEmail());
+        assertEquals(23, user.getAge());
 
         verify(userRepository).findById(1L);
     }

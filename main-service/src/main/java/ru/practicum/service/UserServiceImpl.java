@@ -9,7 +9,6 @@ import ru.practicum.entity.TypeOperation;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.repository.UserRepository;
 import ru.practicum.dto.UserRequestDto;
-import ru.practicum.dto.UserResponseDto;
 import ru.practicum.dto.UserUpdateDto;
 import ru.practicum.entity.User;
 import ru.practicum.mapper.UserMapper;
@@ -35,15 +34,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto getUser(Long userId) {
-        User user = userRepository.findById(userId)
+    public User getUser(Long userId) {
+        log.info("Поиск пользователя с id {}", userId);
+
+        return userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + " не найден"));
-        return userMapper.mapToUserResponseDto(user);
     }
 
     @Override
     @Transactional
-    public UserResponseDto save(UserRequestDto requestDto) {
+    public User save(UserRequestDto requestDto) {
         log.info("Сохранение User с email: {}", requestDto.getEmail());
 
         if (userRepository.existsByEmail(requestDto.getEmail())) {
@@ -58,12 +58,12 @@ public class UserServiceImpl implements UserService {
 
         kafkaProducer.sendUserOperation(savedUser.getEmail(), TypeOperation.CREATE.name());
 
-        return userMapper.mapToUserResponseDto(savedUser);
+        return savedUser;
     }
 
     @Override
     @Transactional
-    public UserResponseDto update(UserUpdateDto updateDto) {
+    public User update(UserUpdateDto updateDto) {
         log.info("Обновление User с id: {}", updateDto.getId());
 
         if (updateDto.getId() == null) {
@@ -89,11 +89,11 @@ public class UserServiceImpl implements UserService {
         User updateUser = userRepository.save(user);
         log.info("User с id обновлён: {}", updateUser.getId());
 
-        return userMapper.mapToUserResponseDto(updateUser);
+        return updateUser;
     }
 
     @Override
-    public List<UserResponseDto> getUsers(List<Long> ids) {
+    public List<User> getUsers(List<Long> ids) {
         log.info("Поиск User по ids: {}", ids);
 
         if (ids == null || ids.isEmpty()) {
@@ -113,16 +113,16 @@ public class UserServiceImpl implements UserService {
 
         List<User> users = userRepository.findAllById(idsFilter);
         log.info("Найдено Users: {}", users.size());
-        return userMapper.mapToListDto(users);
+        return users;
     }
 
     @Override
-    public List<UserResponseDto> findAll() {
+    public List<User> findAll() {
         log.info("Поиск всех User в базе");
         List<User> users = userRepository.findAll();
         log.info("Общее количество Users в базе данных: {}", users.size());
 
-        return userMapper.mapToListDto(users);
+        return users;
     }
 
     @Override
