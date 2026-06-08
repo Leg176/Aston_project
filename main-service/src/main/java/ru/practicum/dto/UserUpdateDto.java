@@ -1,9 +1,22 @@
 package ru.practicum.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import ru.practicum.constants.OpenApiConstants;
+
+@Schema(description = OpenApiConstants.USER_UPDATE_DESCRIPTION)
 public class UserUpdateDto {
+    @Schema(description = OpenApiConstants.USER_ID_DESCRIPTION,
+            example = OpenApiConstants.USER_ID_EXAMPLE,
+            requiredMode = Schema.RequiredMode.REQUIRED)
     private Long id;
+    @Schema(description = OpenApiConstants.USER_NAME_DESCRIPTION,
+            example = OpenApiConstants.USER_NAME_EXAMPLE)
     private String name;
+    @Schema(description = OpenApiConstants.USER_EMAIL_DESCRIPTION,
+            example = OpenApiConstants.USER_EMAIL_EXAMPLE)
     private String email;
+    @Schema(description = OpenApiConstants.USER_AGE_DESCRIPTION,
+            example = OpenApiConstants.USER_AGE_EXAMPLE)
     private Integer age;
 
     public UserUpdateDto() {

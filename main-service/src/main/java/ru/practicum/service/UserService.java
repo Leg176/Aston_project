@@ -3,20 +3,21 @@ package ru.practicum.service;
 import ru.practicum.dto.UserRequestDto;
 import ru.practicum.dto.UserResponseDto;
 import ru.practicum.dto.UserUpdateDto;
+import ru.practicum.entity.User;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface UserService {
-    UserResponseDto save(UserRequestDto requestDto);
+    User save(UserRequestDto requestDto);
 
-    UserResponseDto update(UserUpdateDto updateDto);
+    User update(UserUpdateDto updateDto);
 
-    List<UserResponseDto> getUsers(List<Long> ids);
+    List<User> getUsers(List<Long> ids);
 
-    List<UserResponseDto> findAll();
+    List<User> findAll();
 
     void deleteUser(Long id);
 
-    UserResponseDto getUser(Long id);
+    User getUser(Long id);
 }
