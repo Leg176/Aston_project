@@ -18,12 +18,12 @@ import ru.practicum.service.MailService;
 @RequestMapping("/mail")
 @Validated
 @Tag(name = ControllerApiConstants.TAG_NAME, description = ControllerApiConstants.TAG_DESCRIPTION)
-public class MailController {
+public class NotificationController {
 
     private final MailService mailService;
-    private static final Logger log = LoggerFactory.getLogger(MailController.class);
+    private static final Logger log = LoggerFactory.getLogger(NotificationController.class);
 
-    public MailController(MailService mailService) {
+    public NotificationController(MailService mailService) {
         this.mailService = mailService;
     }
 
